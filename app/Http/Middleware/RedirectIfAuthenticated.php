@@ -14,19 +14,22 @@ class RedirectIfAuthenticated
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
-     * @param  string|null  ...$guards
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
-    public function handle(Request $request, Closure $next, ...$guards)
+    public function handle(Request $request, Closure $next, $guard = null)
     {
-        $guards = empty($guards) ? [null] : $guards;
+        if (Auth::guard($guard)->check() && Auth::user()->role->id == 1) {
 
-        foreach ($guards as $guard) {
-            if (Auth::guard($guard)->check()) {
-                return redirect(RouteServiceProvider::HOME);
-            }
+            return redirect()->route('admin.dashboard');
+
+        } elseif(Auth::guard($guard)->check() && Auth::user()->role->id == 2){
+
+            return redirect()->route('user.dashboard');
+
+        }else {
+
+           return $next($request);
+
         }
-
-        return $next($request);
     }
 }
